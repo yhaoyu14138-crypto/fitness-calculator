@@ -7,8 +7,6 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007AFF">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="健身计算器">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; padding: 40px 20px; }
@@ -37,15 +35,7 @@
         .tag.recommended { background: #007AFF; color: white; }
         .tag.alt { background: #eee; color: #666; }
         .note { font-size: 12px; color: #888; margin-top: 16px; line-height: 1.6; }
-        
-        /* 三餐折叠面板样式 */
-        .diet-toggle-btn { 
-            width: 100%; padding: 14px; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
-            color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; 
-            cursor: pointer; margin-top: 10px; 
-        }
-        .diet-toggle-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,122,255,0.4); }
-        
+        .diet-toggle-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }
         .meal-card { padding: 14px; border-radius: 10px; margin-bottom: 10px; }
         .meal-card.breakfast { background: #fff3e0; border-left: 4px solid #ff9500; }
         .meal-card.lunch { background: #f0f7ff; border-left: 4px solid #007AFF; }
@@ -59,7 +49,7 @@
 <body>
     <div class="container">
         <h1>健身代谢计算器</h1>
-        <p class="subtitle">科学计算你的基础代谢和运动消耗</p>
+        <p class="subtitle">基于中国居民膳食指南2022</p>
         
         <div class="card">
             <h2>身体数据</h2>
@@ -96,21 +86,20 @@
         <div class="card result" id="bmrResult">
             <h2>基础代谢率（BMR）</h2>
             <p class="note">BMR = 清醒不动时身体一天消耗的热量</p>
-            <div class="bmr-item recommended" id="mifflinResult">
+            <div class="bmr-item recommended">
                 <div class="header">
                     <span class="name">Mifflin-St Jeor <span class="tag recommended">推荐</span></span>
                     <span class="value"><span id="mifflinValue">0</span> <span class="unit">kcal/天</span></span>
                 </div>
                 <p class="desc">最推荐的公式，适用于大多数人</p>
             </div>
-            <div class="bmr-item" id="harrisResult">
+            <div class="bmr-item">
                 <div class="header">
                     <span class="name">Harris-Benedict <span class="tag alt">备选</span></span>
                     <span class="value"><span id="harrisValue">0</span> <span class="unit">kcal/天</span></span>
                 </div>
-                <p class="desc">经典公式，适合不计算体脂的情况</p>
             </div>
-            <div class="bmr-item" id="katchResult">
+            <div class="bmr-item" id="katchResult" style="display:none;">
                 <div class="header">
                     <span class="name">Katch-McArdle <span class="tag alt">备选</span></span>
                     <span class="value"><span id="katchValue">0</span> <span class="unit">kcal/天</span></span>
@@ -152,14 +141,14 @@
         </div>
         
         <div class="card result" id="jumpToDiet" style="display:none;margin-bottom:20px;">
-                <button onclick="showDietSection()" style="background: linear-gradient(135deg, #34c759 0%, #30d158 100%);font-size:17px;padding:16px;">
-                    🍽️ 查看饮食推荐
-                </button>
-            </div>
-            
-            <div class="card result" id="dietResult" style="display:none;">
+            <button onclick="showDietSection()" style="background: linear-gradient(135deg, #34c759 0%, #30d158 100%);font-size:17px;padding:16px;">
+                🍽️ 查看饮食推荐
+            </button>
+        </div>
+        
+        <div class="card result" id="dietResult" style="display:none;">
             <h2>饮食推荐</h2>
-            <p class="note">基于你的身体数据，推荐的饮食方案</p>
+            <p class="note">基于中国居民膳食指南2022（热量缺口300-500kcal）</p>
             <div class="form-group">
                 <label>选择你的类型</label>
                 <select id="bodyType" onchange="calculateDiet()">
@@ -222,16 +211,13 @@
             
             if (!age || !height || !weight) { alert('请填写完整的身体数据'); return; }
             
-            // Mifflin-St Jeor
             let bmrMifflin = (10 * weight) + (6.25 * height) - (5 * age);
             bmrMifflin += (gender === 'male' ? 5 : -161);
             
-            // Harris-Benedict
             let bmrHarris = gender === 'male' 
                 ? 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
                 : 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
             
-            // Katch-McArdle
             let bmrKatch = null;
             if (bodyFat && bodyFat > 0) {
                 bmrKatch = 370 + (21.6 * weight * (1 - bodyFat / 100));
@@ -242,14 +228,12 @@
             document.getElementById('katchValue').textContent = bmrKatch ? Math.round(bmrKatch) : '--';
             document.getElementById('katchResult').style.display = bmrKatch ? 'block' : 'none';
             
-            // TDEE
             const multipliers = [1.2, 1.375, 1.55, 1.725];
             document.getElementById('tdee1').textContent = Math.round(bmrMifflin * multipliers[0]);
             document.getElementById('tdee2').textContent = Math.round(bmrMifflin * multipliers[1]);
             document.getElementById('tdee3').textContent = Math.round(bmrMifflin * multipliers[2]);
             document.getElementById('tdee4').textContent = Math.round(bmrMifflin * multipliers[3]);
             
-            // 运动消耗
             document.querySelectorAll('.cal-walk1')[0].textContent = Math.round(3.5 * weight);
             document.querySelectorAll('.cal-walk2')[0].textContent = Math.round(5.0 * weight);
             document.querySelectorAll('.cal-run1')[0].textContent = Math.round(7.8 * weight);
@@ -258,12 +242,10 @@
             document.querySelectorAll('.cal-bike')[0].textContent = Math.round(4.0 * weight);
             document.querySelectorAll('.cal-rope')[0].textContent = Math.round(10.0 * weight);
             
-            // 显示所有结果
-            document.getElementById('bmrResult').classList.add('show');
-            document.getElementById('tdeeResult').classList.add('show');
-            document.getElementById('activityResult').classList.add('show');
+            document.getElementById('bmrResult').style.display = 'block';
+            document.getElementById('tdeeResult').style.display = 'block';
+            document.getElementById('activityResult').style.display = 'block';
             document.getElementById('jumpToDiet').style.display = 'block';
-            document.getElementById('dietResult').classList.add('show');
         }
         
         function showDietSection() {
@@ -295,86 +277,69 @@
             
             document.getElementById('dietPlan').style.display = 'block';
             
-            let dailyCalories, deficit, deficitText, deficitReason;
-            let breakfastCal, lunchCal, dinnerCal;
-            let breakfastReason, lunchReason, dinnerReason;
-            let breakfastFood, lunchFood, dinnerFood;
-            let breakfastMacro, lunchMacro, dinnerMacro;
+            // 基于中国居民膳食指南2022的科学建议
+            // 减脂：每天缺口300-500kcal；增重：每天盈余300-500kcal
+            const settings = {
+                obese: { deficit: 400, breakfast: 0.3, lunch: 0.4, dinner: 0.3, reason: "根据《中国居民膳食指南》，每天制造400大卡热量缺口，每周约减0.5kg脂肪，健康可持续" },
+                slim: { deficit: -400, breakfast: 0.35, lunch: 0.4, dinner: 0.25, reason: "每天400大卡盈余，配合力量训练增肌，注意蛋白质补充" },
+                middle: { deficit: 300, breakfast: 0.3, lunch: 0.35, dinner: 0.35, reason: "中年人代谢下降，保持适度热量控制，维持基础代谢" },
+                office: { deficit: 350, breakfast: 0.25, lunch: 0.45, dinner: 0.3, reason: "久坐人群热量消耗较低，适度控制热量，建议每天缺口300-400大卡" }
+            };
             
+            // 基于中国居民膳食指南的食物建议（蛋白质50-65g/天，碳水50-65%，脂肪20-30%）
             const foods = {
                 obese: {
-                    breakfast: { food: "水煮蛋2个 + 牛奶200ml + 全麦面包1片 + 香蕉半根", p: 20, f: 12, c: 45 },
-                    lunch: { food: "鸡胸肉120g + 西兰花200g + 米饭100g + 苹果1个", p: 35, f: 8, c: 55 },
-                    dinner: { food: "鱼虾150g + 青菜300g + 红薯100g", p: 30, f: 6, c: 40 }
+                    breakfast: { food: "水煮蛋2个(14g蛋白) + 牛奶250ml(8g蛋白) + 全麦面包1片(25g碳水) + 香蕉1根(27g碳水)", p: 22, f: 8, c: 52 },
+                    lunch: { food: "鸡胸肉120g(35g蛋白) + 西兰花200g + 米饭100g(28g碳水) + 苹果1个(25g碳水)", p: 35, f: 6, c: 53 },
+                    dinner: { food: "鱼虾150g(30g蛋白) + 青菜300g + 红薯100g(20g碳水)", p: 30, f: 4, c: 20 }
                 },
                 slim: {
-                    breakfast: { food: "煎蛋2个 + 牛奶300ml + 面包2片 + 坚果20g", p: 25, f: 22, c: 50 },
-                    lunch: { food: "牛肉150g + 米饭150g + 蔬菜200g + 酸奶100g", p: 45, f: 18, c: 60 },
-                    dinner: { food: "鸡胸肉150g + 面条100g + 蔬菜300g", p: 40, f: 10, c: 50 }
+                    breakfast: { food: "煎蛋2个(14g蛋白) + 牛奶300ml(10g蛋白) + 面包2片(50g碳水) + 坚果20g(10g脂肪)", p: 24, f: 20, c: 50 },
+                    lunch: { food: "牛肉150g(45g蛋白) + 米饭150g(42g碳水) + 蔬菜200g + 酸奶100g", p: 50, f: 12, c: 42 },
+                    dinner: { food: "鸡胸肉150g(45g蛋白) + 面条100g(25g碳水) + 蔬菜300g", p: 45, f: 6, c: 25 }
                 },
                 middle: {
-                    breakfast: { food: "鸡蛋1个 + 牛奶250ml + 麦片50g + 水果1个", p: 18, f: 10, c: 40 },
-                    lunch: { food: "鱼120g + 米饭120g + 蔬菜250g + 豆腐50g", p: 30, f: 12, c: 50 },
-                    dinner: { food: "瘦肉100g + 蔬菜300g + 杂粮80g", p: 28, f: 8, c: 35 }
+                    breakfast: { food: "鸡蛋1个(7g蛋白) + 牛奶250ml(8g蛋白) + 麦片50g(35g碳水) + 水果1个(25g碳水)", p: 15, f: 8, c: 60 },
+                    lunch: { food: "鱼120g(25g蛋白) + 米饭120g(33g碳水) + 蔬菜250g + 豆腐50g(10g蛋白)", p: 35, f: 8, c: 33 },
+                    dinner: { food: "瘦肉100g(25g蛋白) + 蔬菜300g + 杂粮80g(20g碳水)", p: 25, f: 6, c: 20 }
                 },
                 office: {
-                    breakfast: { food: "包子1个 + 豆浆200ml + 鸡蛋1个", p: 15, f: 10, c: 35 },
-                    lunch: { food: "工作餐（少油）+ 鸡腿1个 + 米饭100g + 青菜", p: 25, f: 12, c: 45 },
-                    dinner: { food: "外卖选择：清蒸鱼 + 米饭 + 蔬菜汤", p: 22, f: 8, c: 40 }
+                    breakfast: { food: "包子1个(8g蛋白) + 豆浆200ml(6g蛋白) + 鸡蛋1个(7g蛋白)", p: 21, f: 10, c: 35 },
+                    lunch: { food: "工作餐（少油）+ 鸡腿1个(20g蛋白) + 米饭100g(28g碳水) + 青菜200g", p: 25, f: 10, c: 28 },
+                    dinner: { food: "外卖选择：清蒸鱼100g(20g蛋白) + 米饭80g(22g碳水) + 蔬菜汤", p: 22, f: 6, c: 22 }
                 }
             };
             
-            const settings = {
-                obese: { deficit: 500, breakfast: 0.3, lunch: 0.4, dinner: 0.3, reason: "每天制造500大卡缺口，每周约减0.5kg脂肪" },
-                slim: { deficit: -300, breakfast: 0.35, lunch: 0.4, dinner: 0.25, reason: "每天300大卡盈余，配合力量训练增肌" },
-                middle: { deficit: 300, breakfast: 0.3, lunch: 0.35, dinner: 0.35, reason: "中年人代谢下降，需控制但保持营养" },
-                office: { deficit: 300, breakfast: 0.25, lunch: 0.45, dinner: 0.3, reason: "久坐人群，适度控制热量" }
-            };
-            
             const s = settings[bodyType];
-            dailyCalories = tdee - s.deficit;
-            deficit = s.deficit;
-            deficitText = deficit > 0 ? '-' + deficit + ' kcal（减脂）' : '+' + Math.abs(deficit) + ' kcal（增重）';
-            deficitReason = s.reason;
+            const dailyCalories = tdee - s.deficit;
+            const deficitText = s.deficit > 0 ? '-' + s.deficit + ' kcal（减脂）' : '+' + Math.abs(s.deficit) + ' kcal（增重）';
             
-            breakfastCal = Math.round(dailyCalories * s.breakfast);
-            lunchCal = Math.round(dailyCalories * s.lunch);
-            dinnerCal = Math.round(dailyCalories * s.dinner);
-            
-            breakfastReason = "早起代谢活跃，需补充蛋白质和碳水";
-            lunchReason = "工作/学习主要能量来源";
-            dinnerReason = "睡前减少摄入，避免热量堆积";
+            const breakfastCal = Math.round(dailyCalories * s.breakfast);
+            const lunchCal = Math.round(dailyCalories * s.lunch);
+            const dinnerCal = Math.round(dailyCalories * s.dinner);
             
             const f = foods[bodyType];
-            breakfastFood = f.breakfast.food;
-            lunchFood = f.lunch.food;
-            dinnerFood = f.dinner.food;
-            
-            breakfastMacro = `蛋白质: ${f.breakfast.p}g | 脂肪: ${f.breakfast.f}g | 碳水: ${f.breakfast.c}g`;
-            lunchMacro = `蛋白质: ${f.lunch.p}g | 脂肪: ${f.lunch.f}g | 碳水: ${f.lunch.c}g`;
-            dinnerMacro = `蛋白质: ${f.dinner.p}g | 脂肪: ${f.dinner.f}g | 碳水: ${f.dinner.c}g`;
             
             document.getElementById('dailyCalories').textContent = dailyCalories;
-            document.getElementById('dailyCaloriesReason').textContent = deficitReason;
+            document.getElementById('dailyCaloriesReason').textContent = s.reason;
             document.getElementById('deficit').textContent = deficitText;
-            document.getElementById('deficitReason').textContent = deficitReason;
+            document.getElementById('deficitReason').textContent = s.reason;
             
             document.getElementById('breakfastCal').textContent = breakfastCal;
-            document.getElementById('breakfastReason').textContent = breakfastReason;
-            document.getElementById('breakfastFood').textContent = breakfastFood;
-            document.getElementById('breakfastMacro').textContent = breakfastMacro;
+            document.getElementById('breakfastReason').textContent = "早起代谢活跃，需补充蛋白质和碳水";
+            document.getElementById('breakfastFood').textContent = f.breakfast.food;
+            document.getElementById('breakfastMacro').textContent = `蛋白质: ${f.breakfast.p}g | 脂肪: ${f.breakfast.f}g | 碳水: ${f.breakfast.c}g`;
             
             document.getElementById('lunchCal').textContent = lunchCal;
-            document.getElementById('lunchReason').textContent = lunchReason;
-            document.getElementById('lunchFood').textContent = lunchFood;
-            document.getElementById('lunchMacro').textContent = lunchMacro;
+            document.getElementById('lunchReason').textContent = "工作/学习主要能量来源";
+            document.getElementById('lunchFood').textContent = f.lunch.food;
+            document.getElementById('lunchMacro').textContent = `蛋白质: ${f.lunch.p}g | 脂肪: ${f.lunch.f}g | 碳水: ${f.lunch.c}g`;
             
             document.getElementById('dinnerCal').textContent = dinnerCal;
-            document.getElementById('dinnerReason').textContent = dinnerReason;
-            document.getElementById('dinnerFood').textContent = dinnerFood;
-            document.getElementById('dinnerMacro').textContent = dinnerMacro;
+            document.getElementById('dinnerReason').textContent = "睡前减少摄入，避免热量堆积";
+            document.getElementById('dinnerFood').textContent = f.dinner.food;
+            document.getElementById('dinnerMacro').textContent = `蛋白质: ${f.dinner.p}g | 脂肪: ${f.dinner.f}g | 碳水: ${f.dinner.c}g`;
             
-            // 自动展开
             document.getElementById('dietDetail').style.display = 'block';
             document.getElementById('dietToggleBtn').textContent = '收起三餐推荐 ▲';
         }
