@@ -1,6 +1,1 @@
-// 禁用缓存，每次都从网络获取
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    fetch(event.request).catch(() => caches.match('/fitness-calculator.html'))
-  );
-});
+// 完全禁用 service worker，不缓存任何内容
