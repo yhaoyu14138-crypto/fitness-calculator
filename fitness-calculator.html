@@ -1,231 +1,59 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健身代谢计算器</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007AFF">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="健身计算器">
-    <link rel="apple-touch-icon" href="icon.png">
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>健身代谢计算器</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; padding: 40px 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { text-align: center; color: #333; margin-bottom: 10px; font-weight: 600; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; font-size: 14px; }
+        .card { background: white; border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .card h2 { font-size: 16px; color: #333; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #eee; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-size: 14px; color: #555; margin-bottom: 6px; }
+        input, select { width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; }
+        input:focus, select:focus { outline: none; border-color: #007AFF; }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        button { width: 100%; padding: 14px; background: #007AFF; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 500; cursor: pointer; }
+        button:hover { background: #0066DD; }
+        .result { display: none; }
+        .result.show { display: block; }
+        .bmr-item { padding: 16px; background: #f8f8f8; border-radius: 10px; margin-bottom: 12px; }
+        .bmr-item.recommended { background: #e8f4ff; border: 2px solid #007AFF; }
+        .bmr-item .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+        .bmr-item .name { font-weight: 500; color: #333; }
+        .bmr-item .value { font-size: 20px; font-weight: 600; color: #007AFF; }
+        .bmr-item .unit { font-size: 14px; color: #888; font-weight: normal; }
+        .bmr-item .desc { font-size: 12px; color: #666; line-height: 1.5; }
+        .tag { font-size: 11px; padding: 3px 8px; border-radius: 4px; margin-left: 8px; }
+        .tag.recommended { background: #007AFF; color: white; }
+        .tag.alt { background: #eee; color: #666; }
+        .note { font-size: 12px; color: #888; margin-top: 16px; line-height: 1.6; }
         
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
-            min-height: 100vh;
-            padding: 40px 20px;
+        /* 三餐折叠面板样式 */
+        .diet-toggle-btn { 
+            width: 100%; padding: 14px; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+            color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; 
+            cursor: pointer; margin-top: 10px; 
         }
+        .diet-toggle-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,122,255,0.4); }
         
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-        
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
-        
-        .card h2 {
-            font-size: 16px;
-            color: #333;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .form-group {
-            margin-bottom: 16px;
-        }
-        
-        label {
-            display: block;
-            font-size: 14px;
-            color: #555;
-            margin-bottom: 6px;
-        }
-        
-        input, select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-size: 15px;
-            transition: border-color 0.2s;
-        }
-        
-        input:focus, select:focus {
-            outline: none;
-            border-color: #007AFF;
-        }
-        
-        .row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-        
-        button {
-            width: 100%;
-            padding: 14px;
-            background: #007AFF;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        
-        button:hover {
-            background: #0066DD;
-        }
-        
-        .result {
-            display: none;
-        }
-        
-        .result.show {
-            display: block;
-        }
-        
-        .bmr-item {
-            padding: 16px;
-            background: #f8f8f8;
-            border-radius: 10px;
-            margin-bottom: 12px;
-        }
-        
-        .bmr-item.recommended {
-            background: #e8f4ff;
-            border: 2px solid #007AFF;
-        }
-        
-        .bmr-item .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        
-        .bmr-item .name {
-            font-weight: 500;
-            color: #333;
-        }
-        
-        .bmr-item .value {
-            font-size: 20px;
-            font-weight: 600;
-            color: #007AFF;
-        }
-        
-        .bmr-item .unit {
-            font-size: 14px;
-            color: #888;
-            font-weight: normal;
-        }
-        
-        .bmr-item .desc {
-            font-size: 12px;
-            color: #666;
-        }
-        
-        .tag {
-            font-size: 11px;
-            padding: 3px 8px;
-            border-radius: 4px;
-            margin-left: 8px;
-        }
-        
-        .tag.recommended {
-            background: #007AFF;
-            color: white;
-        }
-        
-        .tag.alt {
-            background: #eee;
-            color: #666;
-        }
-        
-        .activity-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .activity-table th, .activity-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .activity-table th {
-            font-weight: 500;
-            color: #666;
-            font-size: 13px;
-        }
-        
-        .activity-table td {
-            color: #333;
-        }
-        
-        .activity-table tr:last-child td {
-            border-bottom: none;
-        }
-        
-
-        
-        .diet-toggle-btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .diet-toggle-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,122,255,0.4);
-        }
-
-        .note {
-            font-size: 12px;
-            color: #888;
-            margin-top: 16px;
-            line-height: 1.6;
-        }
+        .meal-card { padding: 14px; border-radius: 10px; margin-bottom: 10px; }
+        .meal-card.breakfast { background: #fff3e0; border-left: 4px solid #ff9500; }
+        .meal-card.lunch { background: #f0f7ff; border-left: 4px solid #007AFF; }
+        .meal-card.dinner { background: #f5f5f5; border-left: 4px solid #8e8e93; }
+        .meal-card .meal-title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+        .meal-card .meal-cal { color: #ff9500; font-weight: 600; }
+        .meal-card .meal-food { color: #34c759; font-size: 13px; margin-top: 6px; line-height: 1.4; }
+        .meal-card .meal-macro { color: #666; font-size: 12px; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -268,7 +96,6 @@
         <div class="card result" id="bmrResult">
             <h2>基础代谢率（BMR）</h2>
             <p class="note">BMR = 清醒不动时身体一天消耗的热量</p>
-            
             <div class="bmr-item recommended" id="mifflinResult">
                 <div class="header">
                     <span class="name">Mifflin-St Jeor <span class="tag recommended">推荐</span></span>
@@ -276,7 +103,6 @@
                 </div>
                 <p class="desc">最推荐的公式，适用于大多数人</p>
             </div>
-            
             <div class="bmr-item" id="harrisResult">
                 <div class="header">
                     <span class="name">Harris-Benedict <span class="tag alt">备选</span></span>
@@ -284,7 +110,6 @@
                 </div>
                 <p class="desc">经典公式，适合不计算体脂的情况</p>
             </div>
-            
             <div class="bmr-item" id="katchResult">
                 <div class="header">
                     <span class="name">Katch-McArdle <span class="tag alt">备选</span></span>
@@ -297,57 +122,38 @@
         <div class="card result" id="tdeeResult">
             <h2>每日总消耗（TDEE）</h2>
             <p class="note">根据你的活动水平计算的每日总消耗</p>
-            
             <div class="bmr-item">
-                <div class="header">
-                    <span class="name">久坐（几乎不运动）</span>
-                    <span class="value"><span id="tdee1">0</span> <span class="unit">kcal</span></span>
-                </div>
+                <div class="header"><span class="name">久坐（几乎不运动）</span><span class="value"><span id="tdee1">0</span> <span class="unit">kcal</span></span></div>
             </div>
-            
             <div class="bmr-item">
-                <div class="header">
-                    <span class="name">轻度活动（每周1-3天）</span>
-                    <span class="value"><span id="tdee2">0</span> <span class="unit">kcal</span></span>
-                </div>
+                <div class="header"><span class="name">轻度活动（每周1-3天）</span><span class="value"><span id="tdee2">0</span> <span class="unit">kcal</span></span></div>
             </div>
-            
             <div class="bmr-item">
-                <div class="header">
-                    <span class="name">中度活动（每周3-5天）</span>
-                    <span class="value"><span id="tdee3">0</span> <span class="unit">kcal</span></span>
-                </div>
+                <div class="header"><span class="name">中度活动（每周3-5天）</span><span class="value"><span id="tdee3">0</span> <span class="unit">kcal</span></span></div>
             </div>
-            
             <div class="bmr-item">
-                <div class="header">
-                    <span class="name">高度活动（每周6-7天）</span>
-                    <span class="value"><span id="tdee4">0</span> <span class="unit">kcal</span></span>
-                </div>
+                <div class="header"><span class="name">高度活动（每周6-7天）</span><span class="value"><span id="tdee4">0</span> <span class="unit">kcal</span></span></div>
             </div>
         </div>
         
         <div class="card result" id="activityResult">
             <h2>活动热量消耗参考</h2>
             <p class="note">基于你体重的运动消耗（单位：kcal/小时）</p>
-            
-            <table class="activity-table">
-                <thead>
-                    <tr>
-                        <th>运动项目</th>
-                        <th>速度/强度</th>
-                        <th>每小时消耗</th>
-                    </tr>
-                </thead>
-                <tbody id="activityBody">
-                </tbody>
+            <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                <tr style="border-bottom:1px solid #eee;"><th style="text-align:left;padding:8px;color:#666;">运动</th><th style="text-align:left;padding:8px;color:#666;">强度</th><th style="text-align:right;padding:8px;color:#666;">每小时</th></tr>
+                <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">走路</td><td style="padding:8px;">4km/h</td><td style="padding:8px;text-align:right;">≈ <span class="cal-walk1">0</span> kcal</td></tr>
+                <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">走路</td><td style="padding:8px;">6km/h</td><td style="padding:8px;text-align:right;">≈ <span class="cal-walk2">0</span> kcal</td></tr>
+                <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">跑步</td><td style="padding:8px;">8km/h</td><td style="padding:8px;text-align:right;">≈ <span class="cal-run1">0</span> kcal</td></tr>
+                <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">跑步</td><td style="padding:8px;">10km/h</td><td style="padding:8px;text-align:right;">≈ <span class="cal-run2">0</span> kcal</td></tr>
+                <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">游泳</td><td style="padding:8px;">中速</td><td style="padding:8px;text-align:right;">≈ <span class="cal-swim">0</span> kcal</td></tr>
+                <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">骑行</td><td style="padding:8px;">休闲</td><td style="padding:8px;text-align:right;">≈ <span class="cal-bike">0</span> kcal</td></tr>
+                <tr><td style="padding:8px;">跳绳</td><td style="padding:8px;">-</td><td style="padding:8px;text-align:right;">≈ <span class="cal-rope">0</span> kcal</td></tr>
             </table>
         </div>
         
         <div class="card result" id="dietResult">
             <h2>饮食推荐</h2>
             <p class="note">基于你的身体数据，推荐的饮食方案</p>
-            
             <div class="form-group">
                 <label>选择你的类型</label>
                 <select id="bodyType" onchange="calculateDiet()">
@@ -358,66 +164,43 @@
                     <option value="office">正常上班族（维持体型）</option>
                 </select>
             </div>
-            
             <div id="dietPlan" style="display:none;">
                 <div class="bmr-item recommended">
                     <div class="header">
                         <span class="name">每日总热量</span>
-                        <span class="value"><span id="dailyCalories">0</span> <span class="unit">kcal</span></span>
+                        <span class="value" style="color:#ff3b30;"><span id="dailyCalories">0</span> <span class="unit">kcal</span></span>
                     </div>
                     <p class="desc" id="dailyCaloriesReason">-</p>
                 </div>
-                
                 <div class="bmr-item">
                     <div class="header">
                         <span class="name">热量缺口/盈余</span>
-                        <span class="value"><span id="deficit">0</span> <span class="unit">kcal</span></span>
+                        <span class="value" style="color:#007AFF;"><span id="deficit">0</span> <span class="unit">kcal</span></span>
                     </div>
                     <p class="desc" id="deficitReason">-</p>
                 </div>
-                
-                <div class="bmr-item">
-                    <div class="header">
-                        <span class="name">早餐</span>
-                        <span class="value"><span id="breakfast">0</span> <span class="unit">kcal</span></span>
+                <button class="diet-toggle-btn" onclick="toggleDietDetail()" id="dietToggleBtn">
+                    查看三餐推荐 ▼
+                </button>
+                <div id="dietDetail" style="display:none;margin-top:15px;">
+                    <div class="meal-card breakfast">
+                        <div class="meal-title">☀️ 早餐 <span class="meal-cal" id="breakfastCal">0</span> kcal</div>
+                        <p class="desc" id="breakfastReason">-</p>
+                        <p class="meal-food" id="breakfastFood">-</p>
+                        <p class="meal-macro" id="breakfastMacro">蛋白质: - | 脂肪: - | 碳水: -</p>
                     </div>
-                    <p class="desc" id="breakfastReason">-</p>
-                </div>
-                
-                <div class="bmr-item">
-                    <div class="header">
-                        <span class="name">午餐</span>
-                        <span class="value"><span id="lunch">0</span> <span class="unit">kcal</span></span>
+                    <div class="meal-card lunch">
+                        <div class="meal-title">🌅 午餐 <span class="meal-cal" id="lunchCal">0</span> kcal</div>
+                        <p class="desc" id="lunchReason">-</p>
+                        <p class="meal-food" id="lunchFood">-</p>
+                        <p class="meal-macro" id="lunchMacro">蛋白质: - | 脂肪: - | 碳水: -</p>
                     </div>
-                    <p class="desc" id="lunchReason">-</p>
-                </div>
-                
-                <div class="bmr-item">
-                    <div class="header">
-                        <span class="name">晚餐</span>
-                        <span class="value"><span id="dinner">0</span> <span class="unit">kcal</span></span>
+                    <div class="meal-card dinner">
+                        <div class="meal-title">🌙 晚餐 <span class="meal-cal" id="dinnerCal">0</span> kcal</div>
+                        <p class="desc" id="dinnerReason">-</p>
+                        <p class="meal-food" id="dinnerFood">-</p>
+                        <p class="meal-macro" id="dinnerMacro">蛋白质: - | 脂肪: - | 碳水: -</p>
                     </div>
-                    <p class="desc" id="dinnerReason">-</p>
-                </div>
-                <div class="bmr-item">
-                    <div class="header">
-                        <span class="name">早餐推荐</span>
-                    </div>
-                    <p class="desc" id="breakfastFood">-</p>
-                </div>
-                
-                <div class="bmr-item">
-                    <div class="header">
-                        <span class="name">午餐推荐</span>
-                    </div>
-                    <p class="desc" id="lunchFood">-</p>
-                </div>
-                
-                <div class="bmr-item">
-                    <div class="header">
-                        <span class="name">晚餐推荐</span>
-                    </div>
-                    <p class="desc" id="dinnerFood">-</p>
                 </div>
             </div>
         </div>
@@ -431,78 +214,43 @@
             const weight = parseFloat(document.getElementById('weight').value);
             const bodyFat = parseFloat(document.getElementById('bodyFat').value);
             
-            if (!age || !height || !weight) {
-                alert('请填写完整的身体数据');
-                return;
-            }
+            if (!age || !height || !weight) { alert('请填写完整的身体数据'); return; }
             
-            // Mifflin-St Jeor 公式（推荐）
+            // Mifflin-St Jeor
             let bmrMifflin = (10 * weight) + (6.25 * height) - (5 * age);
             bmrMifflin += (gender === 'male' ? 5 : -161);
             
-            // Harris-Benedict 公式
-            let bmrHarris;
-            if (gender === 'male') {
-                bmrHarris = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
-            } else {
-                bmrHarris = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
-            }
+            // Harris-Benedict
+            let bmrHarris = gender === 'male' 
+                ? 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
+                : 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
             
-            // Katch-McArdle 公式（需要体脂率）
+            // Katch-McArdle
             let bmrKatch = null;
             if (bodyFat && bodyFat > 0) {
-                const leanMass = weight * (1 - bodyFat / 100);
-                bmrKatch = 370 + (21.6 * leanMass);
+                bmrKatch = 370 + (21.6 * weight * (1 - bodyFat / 100));
             }
             
-            // 显示结果
             document.getElementById('mifflinValue').textContent = Math.round(bmrMifflin);
             document.getElementById('harrisValue').textContent = Math.round(bmrHarris);
+            document.getElementById('katchValue').textContent = bmrKatch ? Math.round(bmrKatch) : '--';
+            document.getElementById('katchResult').style.display = bmrKatch ? 'block' : 'none';
             
-            if (bmrKatch) {
-                document.getElementById('katchValue').textContent = Math.round(bmrKatch);
-                document.getElementById('katchResult').style.display = 'block';
-            } else {
-                document.getElementById('katchResult').style.display = 'none';
-            }
-            
-            // TDEE 计算
+            // TDEE
             const multipliers = [1.2, 1.375, 1.55, 1.725];
             document.getElementById('tdee1').textContent = Math.round(bmrMifflin * multipliers[0]);
             document.getElementById('tdee2').textContent = Math.round(bmrMifflin * multipliers[1]);
             document.getElementById('tdee3').textContent = Math.round(bmrMifflin * multipliers[2]);
             document.getElementById('tdee4').textContent = Math.round(bmrMifflin * multipliers[3]);
             
-            // 活动消耗计算（MET值）
-            const activities = [
-                { name: '走路', speed: '慢走 4km/h', met: 3.5 },
-                { name: '走路', speed: '快走 6km/h', met: 5.0 },
-                { name: '跑步', speed: '8 km/h', met: 7.8 },
-                { name: '跑步', speed: '10 km/h', met: 10.5 },
-                { name: '跑步', speed: '12 km/h', met: 12.8 },
-                { name: '游泳', speed: '慢速', met: 6.0 },
-                { name: '游泳', speed: '中速', met: 8.0 },
-                { name: '游泳', speed: '快速', met: 10.0 },
-                { name: '骑行', speed: '休闲', met: 4.0 },
-                { name: '骑行', speed: '快速', met: 8.0 },
-                { name: '瑜伽', speed: '-', met: 3.0 },
-                { name: 'HIIT', speed: '-', met: 8.0 },
-                { name: '跳绳', speed: '-', met: 10.0 },
-            ];
-            
-            const tbody = document.getElementById('activityBody');
-            tbody.innerHTML = '';
-            
-            activities.forEach(activity => {
-                const calories = activity.met * weight;
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${activity.name}</td>
-                    <td>${activity.speed}</td>
-                    <td>约 ${Math.round(calories)} kcal</td>
-                `;
-                tbody.appendChild(row);
-            });
+            // 运动消耗
+            document.querySelectorAll('.cal-walk1')[0].textContent = Math.round(3.5 * weight);
+            document.querySelectorAll('.cal-walk2')[0].textContent = Math.round(5.0 * weight);
+            document.querySelectorAll('.cal-run1')[0].textContent = Math.round(7.8 * weight);
+            document.querySelectorAll('.cal-run2')[0].textContent = Math.round(10.5 * weight);
+            document.querySelectorAll('.cal-swim')[0].textContent = Math.round(8.0 * weight);
+            document.querySelectorAll('.cal-bike')[0].textContent = Math.round(4.0 * weight);
+            document.querySelectorAll('.cal-rope')[0].textContent = Math.round(10.0 * weight);
             
             // 显示所有结果
             document.getElementById('bmrResult').classList.add('show');
@@ -510,7 +258,19 @@
             document.getElementById('activityResult').classList.add('show');
             document.getElementById('dietResult').classList.add('show');
         }
-
+        
+        function toggleDietDetail() {
+            const detail = document.getElementById('dietDetail');
+            const btn = document.getElementById('dietToggleBtn');
+            if (detail.style.display === 'none') {
+                detail.style.display = 'block';
+                btn.textContent = '收起三餐推荐 ▲';
+            } else {
+                detail.style.display = 'none';
+                btn.textContent = '查看三餐推荐 ▼';
+            }
+        }
+        
         function calculateDiet() {
             const bodyType = document.getElementById('bodyType').value;
             const tdee = parseFloat(document.getElementById('tdee1').textContent) || 0;
@@ -523,115 +283,89 @@
             
             document.getElementById('dietPlan').style.display = 'block';
             
-            let dailyCalories, deficit, deficitText, deficitReasonText;
-            let breakfastRatio, lunchRatio, dinnerRatio;
+            let dailyCalories, deficit, deficitText, deficitReason;
+            let breakfastCal, lunchCal, dinnerCal;
             let breakfastReason, lunchReason, dinnerReason;
+            let breakfastFood, lunchFood, dinnerFood;
+            let breakfastMacro, lunchMacro, dinnerMacro;
             
-            switch(bodyType) {
-                case 'obese':
-                    // 肥胖人群：较大热量缺口
-                    deficit = 500;
-                    dailyCalories = tdee - deficit;
-                    deficitText = '-' + deficit + ' kcal（减脂）';
-                    deficitReasonText = '每天制造500大卡缺口，每周约减0.5kg脂肪，健康可持续';
-                    breakfastRatio = 0.3;
-                    lunchRatio = 0.4;
-                    dinnerRatio = 0.3;
-                    breakfastReason = '早起代谢活跃，需补充蛋白质和碳水';
-                    lunchReason = '工作/学习主要能量来源';
-                    dinnerReason = '睡前减少摄入，避免热量堆积';
-                    break;
-                    
-                case 'slim':
-                    // 偏瘦：热量盈余
-                    deficit = -300;
-                    dailyCalories = tdee - deficit;
-                    deficitText = '+' + Math.abs(deficit) + ' kcal（增重）';
-                    deficitReasonText = '每天300大卡盈余，配合力量训练增肌';
-                    breakfastRatio = 0.35;
-                    lunchRatio = 0.4;
-                    dinnerRatio = 0.25;
-                    breakfastReason = '早起补充能量，开启一天代谢';
-                    lunchReason = '主要能量摄入';
-                    dinnerReason = '可适当减少，但需保证营养';
-                    break;
-                    
-                case 'middle':
-                    // 中年人：保持代谢
-                    deficit = 300;
-                    dailyCalories = tdee - deficit;
-                    deficitText = '-' + deficit + ' kcal（维持+减脂）';
-                    deficitReasonText = '中年人代谢下降，需控制热量但不能太低，保持基础代谢';
-                    breakfastRatio = 0.3;
-                    lunchRatio = 0.35;
-                    dinnerRatio = 0.35;
-                    breakfastReason = '补充蛋白质维持肌肉';
-                    lunchReason = '适量碳水，保持精力';
-                    dinnerReason = '注意蛋白质摄入，减缓肌肉流失';
-                    break;
-                    
-                case 'office':
-                    // 正常上班族
-                    deficit = 400;
-                    dailyCalories = tdee - deficit;
-                    deficitText = '-' + deficit + ' kcal（维持体型）';
-                    deficitReasonText = '久坐人群热量消耗较低，适度控制即可';
-                    breakfastRatio = 0.25;
-                    lunchRatio = 0.45;
-                    dinnerRatio = 0.3;
-                    breakfastReason = '简单补充，避免上午饿肚子';
-                    lunchReason = '一天中最重要的一餐';
-                    dinnerReason = '下班后可正常吃，注意别太晚';
-                    break;
-            }
-            
-            document.getElementById('dailyCalories').textContent = Math.round(dailyCalories);
-            document.getElementById('dailyCaloriesReason').textContent = deficitReasonText;
-            document.getElementById('deficit').textContent = deficitText;
-            document.getElementById('deficitReason').textContent = deficitReasonText;
-            
-            document.getElementById('breakfast').textContent = Math.round(dailyCalories * breakfastRatio);
-            document.getElementById('breakfastReason').textContent = breakfastReason;
-            document.getElementById('lunch').textContent = Math.round(dailyCalories * lunchRatio);
-            document.getElementById('lunchReason').textContent = lunchReason;
-            document.getElementById('dinner').textContent = Math.round(dailyCalories * dinnerRatio);
-            document.getElementById('dinnerReason').textContent = dinnerReason;
-
-            
-            // 食物搭配建议
-            const foodSuggestions = {
+            const foods = {
                 obese: {
-                    breakfast: "水煮蛋2个 + 牛奶200ml + 全麦面包1片 + 香蕉半根",
-                    lunch: "鸡胸肉100g + 西兰花200g + 米饭100g + 苹果1个",
-                    dinner: "鱼虾150g + 青菜300g + 红薯100g"
+                    breakfast: { food: "水煮蛋2个 + 牛奶200ml + 全麦面包1片 + 香蕉半根", p: 20, f: 12, c: 45 },
+                    lunch: { food: "鸡胸肉120g + 西兰花200g + 米饭100g + 苹果1个", p: 35, f: 8, c: 55 },
+                    dinner: { food: "鱼虾150g + 青菜300g + 红薯100g", p: 30, f: 6, c: 40 }
                 },
                 slim: {
-                    breakfast: "煎蛋2个 + 牛奶300ml + 面包2片 + 坚果20g",
-                    lunch: "牛肉120g + 米饭150g + 蔬菜200g + 酸奶100g",
-                    dinner: "鸡胸肉150g + 面条100g + 蔬菜300g"
+                    breakfast: { food: "煎蛋2个 + 牛奶300ml + 面包2片 + 坚果20g", p: 25, f: 22, c: 50 },
+                    lunch: { food: "牛肉150g + 米饭150g + 蔬菜200g + 酸奶100g", p: 45, f: 18, c: 60 },
+                    dinner: { food: "鸡胸肉150g + 面条100g + 蔬菜300g", p: 40, f: 10, c: 50 }
                 },
                 middle: {
-                    breakfast: "鸡蛋1个 + 牛奶250ml + 麦片50g + 水果1个",
-                    lunch: "鱼100g + 米饭120g + 蔬菜250g + 豆腐50g",
-                    dinner: "瘦肉100g + 蔬菜300g + 杂粮80g"
+                    breakfast: { food: "鸡蛋1个 + 牛奶250ml + 麦片50g + 水果1个", p: 18, f: 10, c: 40 },
+                    lunch: { food: "鱼120g + 米饭120g + 蔬菜250g + 豆腐50g", p: 30, f: 12, c: 50 },
+                    dinner: { food: "瘦肉100g + 蔬菜300g + 杂粮80g", p: 28, f: 8, c: 35 }
                 },
                 office: {
-                    breakfast: "包子1个 + 豆浆200ml + 鸡蛋1个",
-                   午餐: "工作餐（少油）+ 鸡腿1个 + 米饭100g + 青菜",
-                   晚餐: "外卖选择：清蒸鱼 + 米饭 + 蔬菜汤"
+                    breakfast: { food: "包子1个 + 豆浆200ml + 鸡蛋1个", p: 15, f: 10, c: 35 },
+                    lunch: { food: "工作餐（少油）+ 鸡腿1个 + 米饭100g + 青菜", p: 25, f: 12, c: 45 },
+                    dinner: { food: "外卖选择：清蒸鱼 + 米饭 + 蔬菜汤", p: 22, f: 8, c: 40 }
                 }
             };
-
-            const food = foodSuggestions[bodyType] || foodSuggestions.office;
-            document.getElementById('breakfastFood').textContent = food.breakfast;
-            document.getElementById('lunchFood').textContent = food.lunch;
-            document.getElementById('dinnerFood').textContent = food.dinner;
-
+            
+            const settings = {
+                obese: { deficit: 500, breakfast: 0.3, lunch: 0.4, dinner: 0.3, reason: "每天制造500大卡缺口，每周约减0.5kg脂肪" },
+                slim: { deficit: -300, breakfast: 0.35, lunch: 0.4, dinner: 0.25, reason: "每天300大卡盈余，配合力量训练增肌" },
+                middle: { deficit: 100, breakfast: 0.3, lunch: 0.35, dinner: 0.35, reason: "中年人代谢下降，需控制但保持营养" },
+                office: { deficit: 300, breakfast: 0.25, lunch: 0.45, dinner: 0.3, reason: "久坐人群，适度控制热量" }
+            };
+            
+            const s = settings[bodyType];
+            dailyCalories = tdee - s.deficit;
+            deficit = s.deficit;
+            deficitText = (deficit > 0 ? '-' : '+' + Math.abs(deficit)) + ' kcal' + (deficit > 0 ? '（减脂）' : '（增重）');
+            deficitReason = s.reason;
+            
+            breakfastCal = Math.round(dailyCalories * s.breakfast);
+            lunchCal = Math.round(dailyCalories * s.lunch);
+            dinnerCal = Math.round(dailyCalories * s.dinner);
+            
+            breakfastReason = "早起代谢活跃，需补充蛋白质和碳水";
+            lunchReason = "工作/学习主要能量来源";
+            dinnerReason = "睡前减少摄入，避免热量堆积";
+            
+            const f = foods[bodyType];
+            breakfastFood = f.breakfast.food;
+            lunchFood = f.lunch.food;
+            dinnerFood = f.dinner.food;
+            
+            breakfastMacro = `蛋白质: ${f.breakfast.p}g | 脂肪: ${f.breakfast.f}g | 碳水: ${f.breakfast.c}g`;
+            lunchMacro = `蛋白质: ${f.lunch.p}g | 脂肪: ${f.lunch.f}g | 碳水: ${f.lunch.c}g`;
+            dinnerMacro = `蛋白质: ${f.dinner.p}g | 脂肪: ${f.dinner.f}g | 碳水: ${f.dinner.c}g`;
+            
+            document.getElementById('dailyCalories').textContent = dailyCalories;
+            document.getElementById('dailyCaloriesReason').textContent = deficitReason;
+            document.getElementById('deficit').textContent = deficitText;
+            document.getElementById('deficitReason').textContent = deficitReason;
+            
+            document.getElementById('breakfastCal').textContent = breakfastCal;
+            document.getElementById('breakfastReason').textContent = breakfastReason;
+            document.getElementById('breakfastFood').textContent = breakfastFood;
+            document.getElementById('breakfastMacro').textContent = breakfastMacro;
+            
+            document.getElementById('lunchCal').textContent = lunchCal;
+            document.getElementById('lunchReason').textContent = lunchReason;
+            document.getElementById('lunchFood').textContent = lunchFood;
+            document.getElementById('lunchMacro').textContent = lunchMacro;
+            
+            document.getElementById('dinnerCal').textContent = dinnerCal;
+            document.getElementById('dinnerReason').textContent = dinnerReason;
+            document.getElementById('dinnerFood').textContent = dinnerFood;
+            document.getElementById('dinnerMacro').textContent = dinnerMacro;
+            
+            // 自动展开
+            document.getElementById('dietDetail').style.display = 'block';
+            document.getElementById('dietToggleBtn').textContent = '收起三餐推荐 ▲';
         }
-
     </script>
-<script>// if (navigator.serviceWorker) {
-    // navigator.serviceWorker.register('sw.js')
-}
-</script></body>
+</body>
 </html>
