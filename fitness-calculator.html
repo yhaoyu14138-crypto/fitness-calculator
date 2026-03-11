@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#007AFF">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="健身计算器">
+    <link rel="apple-touch-icon" href="icon.png">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>健身代谢计算器</title>
@@ -550,5 +557,8 @@
         }
 
     </script>
-</body>
+<script>if (navigator.serviceWorker) {
+    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed:', err));
+}
+</script></body>
 </html>
