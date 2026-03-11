@@ -315,6 +315,64 @@
                 </tbody>
             </table>
         </div>
+        
+        <div class="card result" id="dietResult">
+            <h2>饮食推荐</h2>
+            <p class="note">基于你的身体数据，推荐的饮食方案</p>
+            
+            <div class="form-group">
+                <label>选择你的类型</label>
+                <select id="bodyType" onchange="calculateDiet()">
+                    <option value="">请选择...</option>
+                    <option value="obese">肥胖人群（需要减脂）</option>
+                    <option value="slim">偏瘦（需要增重）</option>
+                    <option value="middle">中年人（保持代谢）</option>
+                    <option value="office">正常上班族（维持体型）</option>
+                </select>
+            </div>
+            
+            <div id="dietPlan" style="display:none;">
+                <div class="bmr-item recommended">
+                    <div class="header">
+                        <span class="name">每日总热量</span>
+                        <span class="value"><span id="dailyCalories">0</span> <span class="unit">kcal</span></span>
+                    </div>
+                    <p class="desc" id="dailyCaloriesReason">-</p>
+                </div>
+                
+                <div class="bmr-item">
+                    <div class="header">
+                        <span class="name">热量缺口/盈余</span>
+                        <span class="value"><span id="deficit">0</span> <span class="unit">kcal</span></span>
+                    </div>
+                    <p class="desc" id="deficitReason">-</p>
+                </div>
+                
+                <div class="bmr-item">
+                    <div class="header">
+                        <span class="name">早餐</span>
+                        <span class="value"><span id="breakfast">0</span> <span class="unit">kcal</span></span>
+                    </div>
+                    <p class="desc" id="breakfastReason">-</p>
+                </div>
+                
+                <div class="bmr-item">
+                    <div class="header">
+                        <span class="name">午餐</span>
+                        <span class="value"><span id="lunch">0</span> <span class="unit">kcal</span></span>
+                    </div>
+                    <p class="desc" id="lunchReason">-</p>
+                </div>
+                
+                <div class="bmr-item">
+                    <div class="header">
+                        <span class="name">晚餐</span>
+                        <span class="value"><span id="dinner">0</span> <span class="unit">kcal</span></span>
+                    </div>
+                    <p class="desc" id="dinnerReason">-</p>
+                </div>
+            </div>
+        </div>
     </div>
     
     <script>
@@ -403,6 +461,94 @@
             document.getElementById('tdeeResult').classList.add('show');
             document.getElementById('activityResult').classList.add('show');
         }
+
+        function calculateDiet() {
+            const bodyType = document.getElementById('bodyType').value;
+            const tdee = parseFloat(document.getElementById('tdee1').textContent) || 0;
+            
+            if (!bodyType || tdee === 0) {
+                alert('请先填写身体数据并计算，然后选择你的类型');
+                document.getElementById('dietPlan').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('dietPlan').style.display = 'block';
+            
+            let dailyCalories, deficit, deficitText, deficitReasonText;
+            let breakfastRatio, lunchRatio, dinnerRatio;
+            let breakfastReason, lunchReason, dinnerReason;
+            
+            switch(bodyType) {
+                case 'obese':
+                    // 肥胖人群：较大热量缺口
+                    deficit = 500;
+                    dailyCalories = tdee - deficit;
+                    deficitText = '-' + deficit + ' kcal（减脂）';
+                    deficitReasonText = '每天制造500大卡缺口，每周约减0.5kg脂肪，健康可持续';
+                    breakfastRatio = 0.3;
+                    lunchRatio = 0.4;
+                    dinnerRatio = 0.3;
+                    breakfastReason = '早起代谢活跃，需补充蛋白质和碳水';
+                    lunchReason = '工作/学习主要能量来源';
+                    dinnerReason = '睡前减少摄入，避免热量堆积';
+                    break;
+                    
+                case 'slim':
+                    // 偏瘦：热量盈余
+                    deficit = -300;
+                    dailyCalories = tdee - deficit;
+                    deficitText = '+' + Math.abs(deficit) + ' kcal（增重）';
+                    deficitReasonText = '每天300大卡盈余，配合力量训练增肌';
+                    breakfastRatio = 0.35;
+                    lunchRatio = 0.4;
+                    dinnerRatio = 0.25;
+                    breakfastReason = '早起补充能量，开启一天代谢';
+                    lunchReason = '主要能量摄入';
+                    dinnerReason = '可适当减少，但需保证营养';
+                    break;
+                    
+                case 'middle':
+                    // 中年人：保持代谢
+                    deficit = 300;
+                    dailyCalories = tdee - deficit;
+                    deficitText = '-' + deficit + ' kcal（维持+减脂）';
+                    deficitReasonText = '中年人代谢下降，需控制热量但不能太低，保持基础代谢';
+                    breakfastRatio = 0.3;
+                    lunchRatio = 0.35;
+                    dinnerRatio = 0.35;
+                    breakfastReason = '补充蛋白质维持肌肉';
+                    lunchReason = '适量碳水，保持精力';
+                    dinnerReason = '注意蛋白质摄入，减缓肌肉流失';
+                    break;
+                    
+                case 'office':
+                    // 正常上班族
+                    deficit = 400;
+                    dailyCalories = tdee - deficit;
+                    deficitText = '-' + deficit + ' kcal（维持体型）';
+                    deficitReasonText = '久坐人群热量消耗较低，适度控制即可';
+                    breakfastRatio = 0.25;
+                    lunchRatio = 0.45;
+                    dinnerRatio = 0.3;
+                    breakfastReason = '简单补充，避免上午饿肚子';
+                    lunchReason = '一天中最重要的一餐';
+                    dinnerReason = '下班后可正常吃，注意别太晚';
+                    break;
+            }
+            
+            document.getElementById('dailyCalories').textContent = Math.round(dailyCalories);
+            document.getElementById('dailyCaloriesReason').textContent = deficitReasonText;
+            document.getElementById('deficit').textContent = deficitText;
+            document.getElementById('deficitReason').textContent = deficitReasonText;
+            
+            document.getElementById('breakfast').textContent = Math.round(dailyCalories * breakfastRatio);
+            document.getElementById('breakfastReason').textContent = breakfastReason;
+            document.getElementById('lunch').textContent = Math.round(dailyCalories * lunchRatio);
+            document.getElementById('lunchReason').textContent = lunchReason;
+            document.getElementById('dinner').textContent = Math.round(dailyCalories * dinnerRatio);
+            document.getElementById('dinnerReason').textContent = dinnerReason;
+        }
+
     </script>
 </body>
 </html>
