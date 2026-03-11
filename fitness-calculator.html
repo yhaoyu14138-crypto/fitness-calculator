@@ -151,7 +151,7 @@
             </table>
         </div>
         
-        <div class="card result" id="dietResult">
+        <div class="card result" id="dietResult" style="display:none;">
             <h2>饮食推荐</h2>
             <p class="note">基于你的身体数据，推荐的饮食方案</p>
             <div class="form-group">
@@ -256,7 +256,13 @@
             document.getElementById('bmrResult').classList.add('show');
             document.getElementById('tdeeResult').classList.add('show');
             document.getElementById('activityResult').classList.add('show');
+            document.getElementById('jumpToDiet').classList.add('show');
             document.getElementById('dietResult').classList.add('show');
+        }
+        
+        function showDietSection() {
+            document.getElementById('dietResult').style.display = 'block';
+            document.getElementById('dietResult').scrollIntoView({behavior: "smooth"});
         }
         
         function toggleDietDetail() {
@@ -322,7 +328,7 @@
             const s = settings[bodyType];
             dailyCalories = tdee - s.deficit;
             deficit = s.deficit;
-            deficitText = (deficit > 0 ? '-' : '+' + Math.abs(deficit)) + ' kcal' + (deficit > 0 ? '（减脂）' : '（增重）');
+            deficitText = deficit > 0 ? '-' + deficit + ' kcal（减脂）' : '+' + Math.abs(deficit) + ' kcal（增重）';
             deficitReason = s.reason;
             
             breakfastCal = Math.round(dailyCalories * s.breakfast);
