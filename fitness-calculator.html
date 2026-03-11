@@ -378,6 +378,26 @@
                     </div>
                     <p class="desc" id="dinnerReason">-</p>
                 </div>
+                <div class="bmr-item">
+                    <div class="header">
+                        <span class="name">早餐推荐</span>
+                    </div>
+                    <p class="desc" id="breakfastFood">-</p>
+                </div>
+                
+                <div class="bmr-item">
+                    <div class="header">
+                        <span class="name">午餐推荐</span>
+                    </div>
+                    <p class="desc" id="lunchFood">-</p>
+                </div>
+                
+                <div class="bmr-item">
+                    <div class="header">
+                        <span class="name">晚餐推荐</span>
+                    </div>
+                    <p class="desc" id="dinnerFood">-</p>
+                </div>
             </div>
         </div>
     </div>
@@ -555,6 +575,37 @@
             document.getElementById('lunchReason').textContent = lunchReason;
             document.getElementById('dinner').textContent = Math.round(dailyCalories * dinnerRatio);
             document.getElementById('dinnerReason').textContent = dinnerReason;
+
+            
+            // 食物搭配建议
+            const foodSuggestions = {
+                obese: {
+                    breakfast: "水煮蛋2个 + 牛奶200ml + 全麦面包1片 + 香蕉半根",
+                    lunch: "鸡胸肉100g + 西兰花200g + 米饭100g + 苹果1个",
+                    dinner: "鱼虾150g + 青菜300g + 红薯100g"
+                },
+                slim: {
+                    breakfast: "煎蛋2个 + 牛奶300ml + 面包2片 + 坚果20g",
+                    lunch: "牛肉120g + 米饭150g + 蔬菜200g + 酸奶100g",
+                    dinner: "鸡胸肉150g + 面条100g + 蔬菜300g"
+                },
+                middle: {
+                    breakfast: "鸡蛋1个 + 牛奶250ml + 麦片50g + 水果1个",
+                    lunch: "鱼100g + 米饭120g + 蔬菜250g + 豆腐50g",
+                    dinner: "瘦肉100g + 蔬菜300g + 杂粮80g"
+                },
+                office: {
+                    breakfast: "包子1个 + 豆浆200ml + 鸡蛋1个",
+                   午餐: "工作餐（少油）+ 鸡腿1个 + 米饭100g + 青菜",
+                   晚餐: "外卖选择：清蒸鱼 + 米饭 + 蔬菜汤"
+                }
+            };
+
+            const food = foodSuggestions[bodyType] || foodSuggestions.office;
+            document.getElementById('breakfastFood').textContent = food.breakfast;
+            document.getElementById('lunchFood').textContent = food.lunch;
+            document.getElementById('dinnerFood').textContent = food.dinner;
+
         }
 
     </script>
