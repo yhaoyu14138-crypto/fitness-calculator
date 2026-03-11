@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健身代谢计算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        
+        .card h2 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        label {
+            display: block;
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 6px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #007AFF;
+        }
+        
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #0066DD;
+        }
+        
+        .result {
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .bmr-item {
+            padding: 16px;
+            background: #f8f8f8;
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+        
+        .bmr-item.recommended {
+            background: #e8f4ff;
+            border: 2px solid #007AFF;
+        }
+        
+        .bmr-item .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .bmr-item .name {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .bmr-item .value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #007AFF;
+        }
+        
+        .bmr-item .unit {
+            font-size: 14px;
+            color: #888;
+            font-weight: normal;
+        }
+        
+        .bmr-item .desc {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .tag {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+        }
+        
+        .tag.recommended {
+            background: #007AFF;
+            color: white;
+        }
+        
+        .tag.alt {
+            background: #eee;
+            color: #666;
+        }
+        
+        .activity-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .activity-table th, .activity-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .activity-table th {
+            font-weight: 500;
+            color: #666;
+            font-size: 13px;
+        }
+        
+        .activity-table td {
+            color: #333;
+        }
+        
+        .activity-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .note {
+            font-size: 12px;
+            color: #888;
+            margin-top: 16px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>健身代谢计算器</h1>
+        <p class="subtitle">科学计算你的基础代谢和运动消耗</p>
+        
+        <div class="card">
+            <h2>身体数据</h2>
+            <div class="row">
+                <div class="form-group">
+                    <label>性别</label>
+                    <select id="gender">
+                        <option value="male">男</option>
+                        <option value="female">女</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>年龄（岁）</label>
+                    <input type="number" id="age" placeholder="例如：30" min="15" max="100">
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label>身高（cm）</label>
+                    <input type="number" id="height" placeholder="例如：175" min="100" max="250">
+                </div>
+                <div class="form-group">
+                    <label>体重（kg）</label>
+                    <input type="number" id="weight" placeholder="例如：70" min="30" max="300" step="0.1">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>体脂率（%）（可选，用于Katch-McArdle公式）</label>
+                <input type="number" id="bodyFat" placeholder="例如：20" min="5" max="60" step="0.1">
+            </div>
+            <button onclick="calculateBMR()">计算基础代谢</button>
+        </div>
+        
+        <div class="card result" id="bmrResult">
+            <h2>基础代谢率（BMR）</h2>
+            <p class="note">BMR = 清醒不动时身体一天消耗的热量</p>
+            
+            <div class="bmr-item recommended" id="mifflinResult">
+                <div class="header">
+                    <span class="name">Mifflin-St Jeor <span class="tag recommended">推荐</span></span>
+                    <span class="value"><span id="mifflinValue">0</span> <span class="unit">kcal/天</span></span>
+                </div>
+                <p class="desc">最推荐的公式，适用于大多数人</p>
+            </div>
+            
+            <div class="bmr-item" id="harrisResult">
+                <div class="header">
+                    <span class="name">Harris-Benedict <span class="tag alt">备选</span></span>
+                    <span class="value"><span id="harrisValue">0</span> <span class="unit">kcal/天</span></span>
+                </div>
+                <p class="desc">经典公式，适合不计算体脂的情况</p>
+            </div>
+            
+            <div class="bmr-item" id="katchResult">
+                <div class="header">
+                    <span class="name">Katch-McArdle <span class="tag alt">备选</span></span>
+                    <span class="value"><span id="katchValue">0</span> <span class="unit">kcal/天</span></span>
+                </div>
+                <p class="desc">需要体脂率，更适合健身人群</p>
+            </div>
+        </div>
+        
+        <div class="card result" id="tdeeResult">
+            <h2>每日总消耗（TDEE）</h2>
+            <p class="note">根据你的活动水平计算的每日总消耗</p>
+            
+            <div class="bmr-item">
+                <div class="header">
+                    <span class="name">久坐（几乎不运动）</span>
+                    <span class="value"><span id="tdee1">0</span> <span class="unit">kcal</span></span>
+                </div>
+            </div>
+            
+            <div class="bmr-item">
+                <div class="header">
+                    <span class="name">轻度活动（每周1-3天）</span>
+                    <span class="value"><span id="tdee2">0</span> <span class="unit">kcal</span></span>
+                </div>
+            </div>
+            
+            <div class="bmr-item">
+                <div class="header">
+                    <span class="name">中度活动（每周3-5天）</span>
+                    <span class="value"><span id="tdee3">0</span> <span class="unit">kcal</span></span>
+                </div>
+            </div>
+            
+            <div class="bmr-item">
+                <div class="header">
+                    <span class="name">高度活动（每周6-7天）</span>
+                    <span class="value"><span id="tdee4">0</span> <span class="unit">kcal</span></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card result" id="activityResult">
+            <h2>活动热量消耗参考</h2>
+            <p class="note">基于你体重的运动消耗（单位：kcal/小时）</p>
+            
+            <table class="activity-table">
+                <thead>
+                    <tr>
+                        <th>运动项目</th>
+                        <th>速度/强度</th>
+                        <th>每小时消耗</th>
+                    </tr>
+                </thead>
+                <tbody id="activityBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        function calculateBMR() {
+            const gender = document.getElementById('gender').value;
+            const age = parseInt(document.getElementById('age').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            const bodyFat = parseFloat(document.getElementById('bodyFat').value);
+            
+            if (!age || !height || !weight) {
+                alert('请填写完整的身体数据');
+                return;
+            }
+            
+            // Mifflin-St Jeor 公式（推荐）
+            let bmrMifflin = (10 * weight) + (6.25 * height) - (5 * age);
+            bmrMifflin += (gender === 'male' ? 5 : -161);
+            
+            // Harris-Benedict 公式
+            let bmrHarris;
+            if (gender === 'male') {
+                bmrHarris = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+            } else {
+                bmrHarris = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+            }
+            
+            // Katch-McArdle 公式（需要体脂率）
+            let bmrKatch = null;
+            if (bodyFat && bodyFat > 0) {
+                const leanMass = weight * (1 - bodyFat / 100);
+                bmrKatch = 370 + (21.6 * leanMass);
+            }
+            
+            // 显示结果
+            document.getElementById('mifflinValue').textContent = Math.round(bmrMifflin);
+            document.getElementById('harrisValue').textContent = Math.round(bmrHarris);
+            
+            if (bmrKatch) {
+                document.getElementById('katchValue').textContent = Math.round(bmrKatch);
+                document.getElementById('katchResult').style.display = 'block';
+            } else {
+                document.getElementById('katchResult').style.display = 'none';
+            }
+            
+            // TDEE 计算
+            const multipliers = [1.2, 1.375, 1.55, 1.725];
+            document.getElementById('tdee1').textContent = Math.round(bmrMifflin * multipliers[0]);
+            document.getElementById('tdee2').textContent = Math.round(bmrMifflin * multipliers[1]);
+            document.getElementById('tdee3').textContent = Math.round(bmrMifflin * multipliers[2]);
+            document.getElementById('tdee4').textContent = Math.round(bmrMifflin * multipliers[3]);
+            
+            // 活动消耗计算（MET值）
+            const activities = [
+                { name: '走路', speed: '慢走 4km/h', met: 3.5 },
+                { name: '走路', speed: '快走 6km/h', met: 5.0 },
+                { name: '跑步', speed: '8 km/h', met: 7.8 },
+                { name: '跑步', speed: '10 km/h', met: 10.5 },
+                { name: '跑步', speed: '12 km/h', met: 12.8 },
+                { name: '游泳', speed: '慢速', met: 6.0 },
+                { name: '游泳', speed: '中速', met: 8.0 },
+                { name: '游泳', speed: '快速', met: 10.0 },
+                { name: '骑行', speed: '休闲', met: 4.0 },
+                { name: '骑行', speed: '快速', met: 8.0 },
+                { name: '瑜伽', speed: '-', met: 3.0 },
+                { name: 'HIIT', speed: '-', met: 8.0 },
+                { name: '跳绳', speed: '-', met: 10.0 },
+            ];
+            
+            const tbody = document.getElementById('activityBody');
+            tbody.innerHTML = '';
+            
+            activities.forEach(activity => {
+                const calories = activity.met * weight;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${activity.name}</td>
+                    <td>${activity.speed}</td>
+                    <td>约 ${Math.round(calories)} kcal</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // 显示所有结果
+            document.getElementById('bmrResult').classList.add('show');
+            document.getElementById('tdeeResult').classList.add('show');
+            document.getElementById('activityResult').classList.add('show');
+        }
+    </script>
+</body>
+</html>
